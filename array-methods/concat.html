@@ -1,0 +1,162 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+
+// Function signature:
+// var new_array = old_array.concat([value1[, value2[, ...[, valueN]]]])
+
+// Callback parameters:
+// valueN
+
+// Return value:
+// A new array
+
+// Notes:
+// A shallow copy of a returned array has a different reference address.
+// An original concatenated array will not be altered by another call to concat.
+    // It *may* take an additional parameter as the old array instead of dot notation.
+
+// My original solution:
+
+function concat (originalArray, array) {
+    var resultingArray = [];
+    var newArray = [];
+    var length = 0;
+
+    if (Array.isArray(originalArray) === false) {
+      throw new SyntaxError("Invalid or unexpected token");
+    }
+// If there is only one provided array, return the array.
+    if (originalArray && arguments < 2) {
+        return originalArray;
+    }
+// Every originalArray element is copied to the returned array, then length++ for each element (kind of like 'counter' in reduce).
+    for (var i = length; i < originalArray.length; i++) {
+        resultingArray[i] = originalArray[i];
+        length++;
+    }
+// This pushes each non-array valueN element into newArray.
+    if (array) {
+        for (var j = 1; j < arguments.length; j++) {
+            newArray.push(arguments[j]);
+        }
+// This pushes each newArray element into resultingArray.
+        for (var k = 0; k < newArray.length; k++) {
+// If the element is a nested array, loop through each nested element first.
+            if (Array.isArray(newArray[k]) === true) {
+                for (var argIndex = 0; argIndex < newArray[k].length; argIndex++){
+                    resultingArray.push(newArray[k][argIndex]);
+                }
+// Otherwise, if the element is NOT a nested array, just push the newArray element into resultingArray.
+// Length is used here to represent originalArray's indexes.
+            } else {
+                resultingArray[length + k] = newArray[k];
+            }
+        }
+    }
+
+    return resultingArray;
+
+}
+
+// I modified and commented parts of Kyle Knaggs' solution for clarification:
+
+// function concat (originalArray, array) {
+//     var resultingArray = [];
+
+//     if (Array.isArray(originalArray) === false) {
+//       throw new SyntaxError("Invalid or unexpected token");
+//     }
+// // If only one valueN array argument, return the originalArray.
+//     if (originalArray && arguments < 2) {
+//         return originalArray;
+//     }
+// // Slices a default copy of the originalArray.
+//     resultingArray = originalArray.slice(0);
+
+// // argIndex starts at 1 and encompasses all of the valueN arguments.
+//     for (var argIndex = 1; argIndex < arguments.length; argIndex++) {
+// // In this for loop, the arguments are selected one by one.
+//       var currentArgument = arguments[argIndex];
+// // If the argument isn't an array, push the element to the array.
+//         if (Array.isArray(currentArgument) === false) {
+//             resultingArray.push(currentArgument);
+//         } else {
+// // If the argument is an array, each array argument's individual nested elements are pushed.
+//             for (var i = 0; i < currentArgument.length; i++) {
+//                 resultingArray.push(currentArgument[i]);
+//             }
+//         }
+//     }
+
+//     return resultingArray;
+// }
+
+
+tests({
+    'It should accept the originalArray as the first argument.': function() {
+        var newArray = concat([1], 2, 3);
+        eq(newArray[0], 1);
+        eq(newArray[1], 2);
+    },
+    'It should push each element of the accepted arguments to the end of the newArray.': function() {
+        var newArray = concat([1], 2, ['string']);
+        eq(newArray[0], 1);
+        eq(newArray[1], 2);
+        eq(newArray[2], 'string');
+    },
+    'It should add each element to a new array.': function() {
+        var newArray = concat([1]);
+        eq(typeof(newArray), 'object');
+    },
+    'It should modify the added array when the original array is modified.': function() {
+        var originalArray = [[1]];
+        var newArray = concat(originalArray, [2]); // returns [[1], 2]
+        originalArray[0].push(0); // returns [[1, 0], 2]
+        eq(newArray[0], '1,0');
+        eq(newArray[1], 2);
+    },
+    'It should modify the original array when the added array is modified.': function() {
+        var originalArray = [[1]];
+        var newArray = concat(originalArray, [2]); // returns [[1], 2]
+        newArray[0].push(0); // returns [[1, 0], 2]
+        eq(originalArray[0], '1,0');
+    },
+    'It should not modify the original array that is not an object reference.': function() {
+        var originalArray = [1];
+        var newArray = concat(originalArray, [2]); // returns [1, 2]
+        newArray.push(0); // returns [1, 2, 0]
+        eq(originalArray.length, 1);
+    },
+    'It should modify the original object property when the added object property is modified.': function() {
+        var originalArray = [{name: 'name'}];
+        var newArray = concat(originalArray, [1]); // returns [{name: 'name'}, 1]
+        originalArray[0].name = 'newName'; // returns [{name: 'newName'}, 1]
+        eq(newArray[0].name, 'newName');
+    },
+    'It should return the original array if concat is called with no argument.': function() {
+        var originalArray = [1];
+        var newArray = concat(originalArray);
+        eq(newArray[0], 1);
+    },
+// These two tests were copied from Kyle Knaggs' solution.
+    "3c) If argument is an array, it should flatten argument and append argument to originalArray.": function() {
+      var originalArray = [1, 2];
+      var concattedArray = concat([0], originalArray);
+      eq(originalArray[0], concattedArray[1]);
+      eq(originalArray[1], concattedArray[2]);
+    },
+    "6a) It should throw SyntaxError if originalArray is not an array.": function() {
+      var isSyntaxError = false;
+      try {
+        concat(1);
+      } catch (e) {
+        isSyntaxError = e instanceof SyntaxError;
+      }
+      eq(isSyntaxError, true);
+    }
+
+});
+
+</script>

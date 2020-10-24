@@ -1,0 +1,88 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+
+// Function signature:
+// find(array, callback(element[, index[, array]])[, thisArg])
+
+// Callback parameters:
+    // element
+    // index
+    // array
+
+// Returns the first element in the array that satisfies the provided testing function. Otherwise,
+    // undefined is returned.
+
+
+function find (array, callback, optionalThisObject) {
+    var optionalCallback = callback;
+    var array = {
+        arrayLength: array.length,
+        originalArray: array
+    }
+
+    if (optionalThisObject) {
+        var optionalCallback = callback.bind(optionalThisObject);
+    }
+
+    for (var i = 0; i < array.arrayLength; i++) {
+        // // Uncomment this to test the native find index's values in console.
+        // console.log('Visited index ', i, ' with value ', array.originalArray[i]); 
+        if (optionalCallback(array.originalArray[i], i, array.originalArray)) {
+            return array.originalArray[i];
+        }
+    }
+}
+
+tests({
+    'Callback should run array.length times.': function() {
+        var numberOfTimesCallbackHasRun = 0;
+
+        find([1], function() {
+            numberOfTimesCallbackHasRun++;
+        });
+        eq(numberOfTimesCallbackHasRun, 1);
+    },
+    'It should only return the first truthy value.': function() {
+        var found = find([1, , 2, , 3], function(element) {
+            return element > 2;
+        });
+        eq(found, 3);
+    },
+    'If the array has no truthy value, return undefined.': function() {
+        var found = find([1], function(element) {
+            return element > 1;
+        });
+        eq(found, undefined);
+    },
+    'If an item is deleted, the item is still run in the callback.': function() {
+        var numberOfTimesCallbackHasRun = 0;
+        find([1, 2], function(element, i, array) {
+            array.splice(1, 1);
+            numberOfTimesCallbackHasRun++;
+        });
+        eq(numberOfTimesCallbackHasRun, 2);
+    },
+    'If an item is added, the item is not run in the callback.': function() {
+        var numberOfTimesCallbackHasRun = 0;
+
+        find([1, 2], function(element, i, array) {
+            array.push(3);
+            numberOfTimesCallbackHasRun++;
+        });
+        eq(numberOfTimesCallbackHasRun, 2);
+    },
+    'If no callback is provided, throw a TypeError.': function() {
+        var isTypeError = false;
+        try {
+            find([1]);
+        } catch(e) {
+            var isTypeError = (e instanceof TypeError);
+        };
+        eq(isTypeError, true);
+    }
+
+});
+
+</script>

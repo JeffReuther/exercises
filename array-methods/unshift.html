@@ -1,0 +1,79 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Function signature:
+// arr.unshift(element1[, ...[, elementN]])
+
+// Parameters:
+// elementN
+
+// Return value:
+// The new length property of the object upon which the method was called.
+
+// Notes:
+
+
+function unshift (originalArray) {
+    if (Array.isArray(originalArray) !== true) {
+        throw new TypeError('obj.unshift is not a function')
+    }
+
+    var argsLength = arguments.length - 1;
+    var originalLength = originalArray.length;
+    var reference = {
+    empty: false,
+        emptyArraySwitch: function() {
+            this.empty = true;
+        }
+    }
+
+    if (originalArray.length === 0) {
+        reference.emptyArraySwitch();
+    }
+
+    for (var i = originalLength; i > 0; i--) {
+        if (reference.empty === false) {
+            originalArray[argsLength + i - 1] = originalArray[i - 1];
+        }
+    }
+
+    for (var i = argsLength; i > 0; i--) {
+        originalArray[i - 1] = arguments[i];
+    }
+
+    return originalArray.length;
+
+}
+
+
+tests({
+    'It should add element1 (one element) to the beginning of the array.': function() {
+        var array = [2];
+        var unshifted = unshift(array, 1);
+        eq(array[0], 1);
+        eq(array[1], 2)
+    },
+    'It should add elementN (more than one element) to the beginning of the array.': function() {
+        var array = [1, 2]; 
+        var unshifted = unshift(array, -2, -1, 0);
+        eq(array[0], -2);
+        eq(array[4], 2);
+    },
+    'It should return the length of the new array.': function() {
+        var array = [1];
+        var unshifted = unshift(array, 2, 3, 4);
+        eq(unshifted, 4);
+    },
+    'It should throw a TypeError if a non-array element is the object on which it is called.': function() {
+        var obj = {};
+        var isTypeError = false;
+        try {
+            unshift(obj, 1);
+        } catch(e) {
+            var isTypeError = (e instanceof TypeError);
+        }
+        eq(isTypeError, true);
+    }
+});
+
+</script>

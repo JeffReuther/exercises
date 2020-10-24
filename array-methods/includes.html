@@ -1,0 +1,90 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+
+// Function signature:
+// arr.includes(valueToFind[, fromIndex])
+
+// Parameters:
+// valueToFind (element)
+// fromIndex (startingIndex)
+
+// Return value:
+// Boolean true or false
+
+// Notes:
+
+
+function includes (array, element, startingIndex) {
+    var index = 0;
+
+    if (!array) {
+        throw new ReferenceError('includes is not defined');
+    }
+
+    if (startingIndex) {
+        index = startingIndex;
+    }
+
+    if (startingIndex < 0) {
+        index = array.length + startingIndex;
+    }
+    
+// The following if statement isn't tested, but is from similar indexOf methods for optimization.
+    if (startingIndex >= array.length) {
+        return false;
+    }
+
+    for (var i = index; i < array.length; i++) {
+        if (array[i] === element) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+
+tests({
+    'If searched element is found, it should return true.': function() {
+        var found = includes([1], 1);
+        eq(found, true);
+    },
+    'If searched element is not found, it should return false.': function() {
+        var notFound = includes([1], 0);
+        eq(notFound, false);
+    },
+    'If no searched element, return false.': function() {
+        var notFound = includes(1, 0);
+        eq(notFound, false);
+    },
+    'If startingIndex, search the array from that index (default 0).': function() {
+        var notFound = includes([1, 2], 1, 1);
+        eq(notFound, false);
+    },
+    'If startingIndex is negative, array.length + startingIndex is the startingIndex.': function() {
+        var found = includes([1, 2, 3], 2, -2);
+        var notFound = includes([1, 2, 3], 2, -1);
+        eq(found, true);
+        eq(notFound, false);
+    },
+    'If no array, throw a ReferenceError.': function() {
+        var isReferenceError = false;
+        try {
+            includes();
+        } catch(e) {
+            var isReferenceError = (e instanceof ReferenceError);
+        }
+        eq(isReferenceError, true);
+    },
+    'If searched element is +0, 0, or -0, the searched element is 0.': function() {
+        var foundAsNegative = includes([-0], 0);
+        var foundAsPositive = includes([+0], 0);
+        eq(foundAsNegative, true);
+        eq(foundAsPositive, true);
+    }
+});
+
+</script>

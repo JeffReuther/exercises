@@ -1,0 +1,105 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+
+// Function signature:
+// arr.indexOf(searchElement[, fromIndex])
+
+// Parameters:
+// searchElement (element)
+// fromIndex (startingIndex)
+
+// Return value:
+// first index found, or -1
+
+// Notes:
+
+
+function indexOf (array, element, startingIndex) {
+    var index = 0;
+
+    if (!array) {
+        throw new ReferenceError('indexOf is not defined');
+    }
+
+    if (startingIndex >= array.length) {
+        return -1;
+    }
+
+    if (startingIndex) {
+        index = startingIndex;
+    }
+
+    if (startingIndex < 0) {
+        index = array.length + startingIndex;
+    }
+
+    for (var i = index; i < array.length; i++) {
+        if (i in array) {
+// If the search element is equal to an array item, return the array element.
+            if (element === array[i]) {
+                return i;
+            }
+        }
+    }
+// If no search element.
+    return -1;
+}
+
+
+tests({
+    'It should accept an array argument.': function() {
+        var newArray = indexOf([1], 1);
+        eq(newArray, 0);
+    },
+    'It should compare the search element to the elements in the array.': function() {
+        var indexToFind = 0;
+        var newArray = indexOf([1, 2], 1);
+        eq(newArray, indexToFind);
+    },
+    'If found, it should return the index of the found element.': function() {
+        var newArray = indexOf([1, 2], 2);
+        eq(newArray, 1);
+    },
+    'If not found, it should return -1.': function() {
+        var newArray = indexOf([1, 2], 3);
+        eq(newArray, -1);
+    },
+    'If no search element, return -1.': function() {
+        var newArray = indexOf([1]);
+        eq(newArray, -1);
+    },
+    'If startingIndex is greater than or equal to the array.length, return -1.': function() {
+        var newArray = indexOf([1], 1, 1);
+        var secondArray = indexOf([1], 1, 2);
+        eq(newArray, -1);
+        eq(secondArray, -1);
+    },
+    'If startingIndex, search the array from that index (zero is default).': function() {
+        var startingIndex = 1;
+        var newArray = indexOf([1, 2, 1], 1, startingIndex);
+        eq(newArray, 2);
+    },
+    'If startingIndex is negative, array.length + startingIndex is the startingIndex.': function() {
+        var startingIndex = -10;
+        var newArray = indexOf([1, 2, 1], 1, startingIndex);
+        eq(newArray, 0);
+    },
+    'If no array, throw a ReferenceError.': function() {
+        var isReferenceError = false;
+        try {
+            indexOf();
+        } catch(e) {
+            var isReferenceError = (e instanceof ReferenceError);
+        }
+        eq(isReferenceError, true);
+    },
+// This test copied from Kyle Knaggs' solution.
+    "6a) It should skip holes.": function() {
+      var indexOfElement = indexOf([, , ,], undefined);
+      eq(indexOfElement, -1);
+    }
+});
+
+</script>

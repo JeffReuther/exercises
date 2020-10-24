@@ -1,0 +1,75 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Function signature:
+// arr.shift()
+
+// Parameters:
+// None.
+
+// Return value:
+// The removed element from the array; undefined if the array is empty.
+
+// Notes:
+
+
+function shift (originalArray) {
+    var length = originalArray.length;
+    var itemToBeRemoved = originalArray[0];
+
+    if (length === 0) {
+        return undefined;
+    }
+
+    var counter = 0;
+    for (var i = 0; i < originalArray.length - 1; i++) {
+        if (i + 1 in originalArray) {
+            originalArray[i] = originalArray[i + 1];
+        } else {
+            delete originalArray[i];
+        }
+        counter++;
+    }
+    originalArray.length = counter;
+
+    return itemToBeRemoved;
+
+}
+
+
+tests({
+    'If the array is empty, it should return undefined.': function() {
+        var shifted = shift([]);
+        eq(shifted, undefined);
+    },
+    'It should remove the array[0] element.': function() {
+        var array = [1, 2];
+        shift(array);
+        eq(array.length, 1);
+        eq(array[0], 2);
+    },
+    'It should work with holes.': function() {
+        var array = [,1,,2,,3];
+        shift(array);
+        eq(array.length, 5);
+        eq(array[0], 1);
+    },
+    'It should return the removed element.': function() {
+        var array = [1, 2];
+        var shifted = shift(array);
+        eq(shifted, 1);
+    },
+    'It should throw a TypeError if an element without a length property is the object on which it is called.': function() {
+        var nullItem = null;
+        var isTypeError = false;
+        try {
+            shift(nullItem);
+        } catch(e) {
+            var isTypeError = (e instanceof TypeError);
+        }
+        eq(isTypeError, true);
+        
+    }
+});
+
+</script>

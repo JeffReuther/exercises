@@ -1,0 +1,144 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+// function every (array, callback, optionalThisObject) {
+//     var modalCallback = callback;
+//
+//     if (optionalThisObject) {
+//         var modalCallback = callback.bind(optionalThisObject);
+//     }
+//
+//     for (i = 0; i < array.length; i++) {
+//         modalCallback(array[i], i, array);
+//     }
+// }
+
+// Function signature:
+// arr.every(callback(element[, index[, array]])[, thisArg])
+
+// Callback parameters:
+    // element
+    // index
+    // array
+    // thisArg
+
+// Notes:
+
+function every (array, callback, optionalThisObject) {
+    var modalCallback = callback;
+    var trueCount = 0;
+    var holeCount = 0;
+    var index = 0;
+    var array = {
+        arrayLength: array.length,
+        originalArray: array
+    }
+
+    if (optionalThisObject) {
+        modalCallback = callback.bind(optionalThisObject);
+    }
+
+    if (array.originalArray.length === 0) {
+        return true;
+    }
+
+    // Keeping this useless error code for archive purposes...
+    // if (arguments.length === 1 || arguments.length === 2 && typeof arguments[1] !== 'function') {
+    //     throw new TypeError('undefined is not a function');
+    // }
+
+    for (var index = 0; index < array.arrayLength; index++) {
+    // This skips holes and adds holeCount++.
+        if (index in array.originalArray) {
+    // If callback returns true, trueCount++.
+            if (modalCallback(array.originalArray[index], index, array.originalArray)) {
+                trueCount++;
+    // If callback is false, return false.
+            } else {
+                return false;
+            }
+        } else {
+            holeCount++;
+        }
+    }
+    // If every hole-excluded index is true, return true.
+    if (trueCount === index - holeCount) {
+        return true;
+    }
+}
+
+
+tests({
+'It should run callback array.length times.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+    every([1], function() {
+        numberOfTimesCallbackHasRun++;
+    });
+    eq(numberOfTimesCallbackHasRun, 1);
+},
+'If the array is empty, return true.': function() {
+    var found = every([], function(element) {
+        return element;
+    });
+    eq(found, true);
+},
+
+'If a callback argument is false, it should return false.': function() {
+    var found = every([1, 2], function(element) {
+        return element < 2;
+    });
+    eq(found, false);
+},
+'If every callback argument is true, it should return true.': function() {
+    var found = every([1, 2], function(element) {
+        return element < 3;
+    });
+    eq(found, true);
+},
+'If an element is changed in the callback, the changed value is later passed to callback.': function() {
+    every([1, 2], function(element, index, array) {
+        array[1] = 1;
+        eq(array[1], 1);
+    });
+},
+'It should skip deleted values.': function() {
+    var found = every([1, 2, 3], function(element, index, array) {
+        array.splice(2, 1);
+        return element < 3;
+    });
+    eq(found, true);
+},
+'It should skip holes.': function() {
+    var found = every([, 1 , 2 ,], function(element) {
+        return element < 3;
+    });
+    eq(found, true);
+},
+'If an item is added, the item is not run in the callback.': function() {
+    var found = every([1], function(element, index, array) {
+        array.push(2);
+        return element < 2;
+    });
+    eq(found, true);
+},
+'If no callback is provided, it should throw a TypeError.': function() {
+    var isTypeError = false;
+        try {
+            every([1]);
+        } catch(e) {
+            var isTypeError = (e instanceof TypeError);
+        };
+        eq(isTypeError, true);
+},
+// This test is from Kyle Knaggs' solution:
+    "6) It should accept an optional this argument.": function() {
+        debugger;
+      every([1], function() {
+          eq(this.description, "Optional this argument.");
+        }, {description: "Optional this argument."}
+      );
+    }
+});
+
+</script>

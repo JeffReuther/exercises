@@ -1,0 +1,97 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Function signature:
+// arr.join([separator])
+
+// Parameters:
+// array
+// separator
+
+// Return value:
+// A concatenated string of all elements from the provided array.
+
+// Notes:
+
+
+function join (array, separator) {
+    var stringArray = [];
+    var defaultSeparator = ',';
+
+    if (!array) {
+        throw new ReferenceError('join is not defined');
+    }
+
+    if (separator) {
+// If separator, and separator is NOT empty, replace the default commas with the separator.
+        defaultSeparator = separator;
+    }
+
+    stringArray[0] = array[0];
+
+    if (separator === '') {
+// If separator is strictly an empty string, run the for loop without the defaultSeparator.
+        for (var i = 1; i < array.length; i++) {
+// If an array element is null, replace it with an empty string.
+            if (array[i] === null) {
+                array[i] = '';
+            }
+            stringArray[0] = stringArray + array[i];
+        }
+
+        return stringArray;
+    }
+
+    for (var i = 1; i < array.length; i++) {
+// If an array element is null, replace it with an empty string.
+        if (array[i] === null) {
+                array[i] = '';
+        }
+        stringArray[0] = stringArray + defaultSeparator + array[i];
+    }
+
+    return stringArray;
+}
+
+
+tests({
+    'If no separator, it should separate each element with commas.': function() {
+        var joined = join(['One', 'Two', 'Three']);
+        eq(joined, 'One,Two,Three');
+    },
+    'If separator, it should separate each element with the separator.': function() {
+        var joined = join(['One', 'Two', 'Three'], '-');
+        eq(joined, 'One-Two-Three');
+    },
+    'If separator is empty, it should separate each element with the separator.': function() {
+        var joined = join(['One', 'Two', 'Three'], '');
+        eq(joined, 'OneTwoThree');
+    },
+    'If an element is undefined, null, or an empty array, it is converted into an empty array.': function() {
+        var joined = join([undefined, null, []]);
+        eq(joined, ',,');
+    },
+    'If an element is an object, it should convert into a string.': function() {
+        var joined = join([{}]);
+        eq(joined, '[object Object]');
+    },
+    'If arguments in a function are passed into join as elements, they should convert into a string.': function() {
+       function f (a,b,c) {
+            return join(arguments);
+        }
+        var joined = f(1,'a',true);
+        eq(joined, '1,a,true');
+    },
+    'If no array, it should throw a ReferenceError.': function() {
+        var isReferenceError = false;
+        try {
+            join();
+        } catch(e) {
+            var isReferenceError = (e instanceof ReferenceError);
+        }
+        eq(isReferenceError, true);
+    }
+   
+});
+
+</script>

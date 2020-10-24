@@ -1,0 +1,102 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Prototype implementation:
+
+// Function signature:
+// findIndex(array, callback( element[, index[, array]] )[, thisArg])
+
+// Callback parameters:
+// element
+// index
+// array
+
+// The findIndex() method returns the index of the first element in the array
+//  that satisfies the provided testing function.
+// Otherwise, it returns -1, indicating that no element passed the test.
+
+function findIndex (array, callback, optionalThisObject) {
+    var optionalCallback = callback;
+    // Snapshots the array values in object properties to continue callback despite mutations.
+    var array = {
+        arrayLength: array.length,
+        originalArray: array
+    }
+
+    if (optionalThisObject) {
+        var optionalCallback = callback.bind(optionalThisObject);
+    };
+
+    // If array is empty.
+    if (array.length === 0) {
+        return -1;
+    }
+
+    // If array is not empty and there is a truthy element.
+    for (var i = 0; i < array.arrayLength; i++) {
+        if (optionalCallback(array.originalArray[i], i, array.originalArray)) {
+            return i;
+        }
+    };
+
+    // If array is not empty and there is no truthy element.
+    return -1;
+
+};
+
+
+tests({
+'It should run array.length times.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+
+    findIndex([1], function() {
+        numberOfTimesCallbackHasRun++;
+    });
+    eq(numberOfTimesCallbackHasRun, 1);
+},
+'If callback returns a truthy value, it should immediately return the index of the element.': function() {
+    var found = findIndex([1, 2], function(element, i) {
+        return element > 1;
+    });
+    eq(found, 1);
+},
+'If array.length is 0, it should return -1.': function() {
+    var found = findIndex([], function() {});
+    eq(found, -1);
+},
+'If no truthy element, it should return -1.': function() {
+    var found = findIndex([1], function(element, i) {
+        return element > 1;
+    });
+    eq(found, -1);
+},
+'If an item is deleted, the item should still run in the callback.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+
+    findIndex([1, 2], function(element, i, array) {
+        array.splice(1, 1);
+        numberOfTimesCallbackHasRun++;
+    });
+    eq(numberOfTimesCallbackHasRun, 2);
+},
+'If an item is added, the item should not run in the callback.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+
+    findIndex([1, 2], function(element, i, array) {
+        array.push(3);
+        numberOfTimesCallbackHasRun++;
+    });
+    eq(numberOfTimesCallbackHasRun, 2);
+},
+'If no callback is provided, it should throw a TypeError.': function() {
+    var isTypeError = false;
+        try {
+            findIndex([1]);
+        } catch(e) {
+            var isTypeError = (e instanceof TypeError);
+        };
+        eq(isTypeError, true);
+}
+});
+
+</script>

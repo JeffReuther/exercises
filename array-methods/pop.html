@@ -1,0 +1,61 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Function signature:
+// arrName.pop()
+
+// Parameters:
+// None.
+
+// Return value:
+// The removed element from the array; undefined if the array is empty.
+
+
+// Notes:
+
+
+function pop (originalArray) {
+    var length = originalArray.length - 1;
+    var itemToBeRemoved = originalArray[length];
+
+    if (originalArray.length === 0) {
+        return undefined;
+    }
+
+    originalArray.length = length;
+
+    return itemToBeRemoved;
+
+}
+
+
+tests({
+    'If the array is empty, it should return undefined.': function() {
+        var popped = pop([]);
+        eq(popped, undefined);
+    },
+    'It should remove the array[array.length - 1] element.': function() {
+        var array = [1, 2];
+        var popped = pop(array);
+        eq(popped, 2);
+        eq(array[1], undefined);
+    },
+    'It should return the removed element.': function() {
+        var array = [1, 2];
+        var popped = pop(array);
+        eq(popped, 2);
+    },
+    'It should throw a TypeError if an element without a length property is the object on which it is called.': function() {
+        var nullItem = null;
+        var isTypeError = false;
+        try {
+            pop(nullItem);
+        } catch(e) {
+            var isTypeError = (e instanceof TypeError);
+        }
+        eq(isTypeError, true);
+        
+    }
+});
+
+</script>

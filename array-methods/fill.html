@@ -1,0 +1,170 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Function signature:
+// arr.fill(value[, start[, end]])
+
+// Parameters:
+// value
+// start
+// end
+
+// Return value:
+// The modified array, filled with value.
+
+// Notes:
+// 
+
+function fill (originalArray, value, start, end) {
+
+    var startIndex = 0;
+    var startNaN = false;
+    var endIndex = originalArray.length;
+    var endNaN = false;
+// If either start or end are NaN, the NaN parameter defaults to index 0 or originalArray.length respectively.
+// If both are NaN, the originalArray is returned immediately.
+    if (Number.isNaN(start) === true) {
+        startNaN = true;
+    }
+
+    if (Number.isNaN(end) === true) {
+        endNaN = true;
+    }
+
+    if (startNaN === true && endNaN === true) {
+        return originalArray;
+    } else {
+// If start value exceeds the length of the array, the for loop doesn't run.
+        if (start > originalArray.length) {
+            return originalArray;
+        } else {
+            if (start) {
+// If start is not a negative, the value is applied.
+                if (start >= 0) {
+                    startIndex = start;
+// Otherwise, the modified value is applied.
+                } else {
+                    startIndex = originalArray.length + start;
+                }
+            }
+
+            if (end) {
+// If end is not a negative, the value is applied.
+                if (end >= 0) {
+                    endIndex = end;
+// Otherwise, the modified value is applied.
+                } else {
+                    endIndex = originalArray.length + end;
+                }
+            }
+        }
+    }
+// These conditionals handle the NaN edge cases.
+    if (startNaN === true && endNaN === false) {
+        startIndex = 0;
+    }
+    if (startNaN === false && endNaN === true) {
+        endIndex = originalArray.length;
+    }
+
+    for (var i = startIndex; i < endIndex; i++) {
+        originalArray[i] = value;
+    }
+
+    return originalArray;
+
+}
+
+
+tests({
+    'If no start, the loop should start at 0.': function() {
+        var array = [0, 0];
+        fill(array, 9);
+        eq(array[0], 9);
+        eq(array[1], 9);
+    },
+    'If no end, the loop should end at originalArray.length.': function() {
+        var array = [0, 0];
+        fill(array, 9);
+        eq(array[0], 9);
+        eq(array[1], 9);
+    },
+    'If start, the loop should start at the index of start value.': function() {
+        var array = [0, 0];
+        fill(array, 9, 1);
+        eq(array[0], 0);
+        eq(array[1], 9); // only array[1] = 9
+    },
+    'If start is negative, the loop should start at the index of originalArray.length + start.': function() {
+        var array = [0, 0];
+        fill(array, 9, -1);
+        eq(array[0], 0);
+        eq(array[1], 9); // only array[1] = 9
+    },
+    'If end, the loop should end at the index of end value.': function() {
+        var array = [0, 0];
+        fill(array, 9, 0, 1);
+        eq(array[0], 9); // only array[0] = 9
+        eq(array[1], 0);
+    },
+    'If end is negative, the loop should end at the index of originalArray.length + end.': function() {
+        var array = [0, 0];
+        fill(array, 9, 0, -1);
+        eq(array[0], 9); // only array[0] = 9
+        eq(array[1], 0);
+    },
+    'If start is greater than originalArray.length, it should return originalArray.': function() {
+        var array = [0, 0];
+        fill(array, 9, 2, 3);
+        eq(array[0], 0);
+        eq(array[1], 0);
+    },
+    'If start and end are NaN, it should return originalArray.': function() {
+        var array = [0, 0];
+        fill(array, 9, NaN, NaN);
+        eq(array[0], 0);
+        eq(array[1], 0);
+    },
+    'If end is NaN and start is a number, it should end at index originalArray.length.': function() {
+        var array = [0, 0];
+        fill(array, 9, 1, NaN);
+        eq(array[0], 0);
+        eq(array[1], 9);
+    },
+    'If start is NaN and end is a number, it should start at index 0.': function() {
+        var array = [0, 0];
+        fill(array, 9, NaN, 1);
+        eq(array[0], 9);
+        eq(array[1], 0);
+    },
+    'It should change every item in the array into the value item.': function() {
+        var array = [-1,'one',{2:'two'},null];
+        fill(array, 9);
+        eq(array[0], 9);
+        eq(array[1], 9);
+        eq(array[2], 9);
+        eq(array[3], 9);
+    },
+    'It should return the modified array itself, filled with value.': function() {
+        var array = [0, 0];
+        var filled = fill(array, 9);
+        eq(filled[0], 9);
+        eq(filled[1], 9);
+    },
+    'If a property on a filled object is changed, it should change each other filled object.': function() {
+        var array = [0, 0, 0];
+        var filled = fill(array,{});
+        filled[0].hi = 'hi';
+        eq(filled[1].hi, 'hi');
+        eq(filled[2].hi, 'hi');
+
+    },
+    'It should work with call.': function() {
+        var array = Array(1);
+        var filled = array.fill.call({ length: 1 }, 4)   // {1: 4, length: 1}
+        eq(filled[0], 4);
+        eq(filled.length, 1);
+    }
+});
+
+</script>

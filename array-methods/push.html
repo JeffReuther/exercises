@@ -1,0 +1,199 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// Function signature:
+// arr.push([element1[, ...[, elementN]]])
+
+// Parameters:
+// elementN
+
+// Return value:
+// The new length property of the object upon which the method was called.
+
+// Notes:
+// This method can be used with call() or apply() on objects resembling arrays.
+    // Neither strings nor arguments are mutable options (cannot be mutated).
+// The push method relies on a length property to determine where to start inserting the given values.
+// If the length property cannot be converted into a number, the index used is 0.
+    // If length is nonextant, length will be created.
+// Array.prototype constructor template should be used for call and apply.
+
+
+function push (originalArray) {
+  var totalLength = 0;
+
+// If the element to which push appends has no length property (i.e. if it's null, undefined, NaN, or nonexistent)...
+  if (!originalArray.length) {
+// And the original element's length is set to zero.
+    originalArray.length = 0;
+  } else {
+// Otherwise, we know that the element has a native length.
+    totalLength = originalArray.length;
+  }
+
+// originalArray is our starting arguments[0] element, so we set i to 1.
+    for (var i = 1; i < arguments.length; i++) {
+// If the second (pushed) element in the arguments array is an array.
+        if (this === originalArray) {
+// Perform a second loop through that array, and increment length for each.
+            for (var j = 0; j < arguments[i].length; j++) {
+               originalArray[originalArray.length] = arguments[i][j];
+                totalLength++;
+            }
+        } else {
+// Otherwise, loop through the arguments array and increment length for each.
+           originalArray[originalArray.length] = arguments[i];
+            totalLength++;
+        }
+    }
+// If we started with an originalArray.length.
+   if (totalLength) {
+// The new length is the total of pushed elements.
+       originalArray.length = totalLength;
+   } else {
+// Otherwise, with a non-native originalArray.length property (set to zero), we count the for loop iterations, instead, minus arguments[0].
+       originalArray.length = i - 1;
+   }
+    return originalArray.length;
+
+}
+
+
+tests({
+      'It should append element1 to the array.': function() {
+        var originalArray = [];
+        var pushed = push(originalArray, ['second array']);
+        eq(pushed, 1);  // new array length property
+        eq(originalArray[0], 'second array');
+    },
+    'If there are multiple elements in an array, it should append elementN to the array.': function() {
+        var originalArray = ['first array'];
+        var pushed = push(originalArray, ['first item', 'second item']); // elementN as array
+        eq(pushed, 2);  // new array length property
+        eq(originalArray[0], ['first array']);
+        eq(originalArray[1][0], 'first item');
+    },
+    'If there are multiple elements outside of the array, it should append elementN to the array.': function() {
+        var originalArray = ['first array'];
+        var pushed = push(originalArray, 'first item', 'second item');
+        eq(pushed, 3);  // new array length property
+        eq(originalArray[0], ['first array']);
+        eq(originalArray[2], 'second item');
+    },
+    'If the originalArray.length is NaN, null, or undefined, it should append with an index of 0.': function() {
+        var obj = {
+            regularObjArray: [],
+            addNaN: function addNaN(elem) {
+                this.length = NaN;
+                push.call(this, obj, elem)
+            },
+            addNull: function addNull(elem) {
+                this.length = null;
+                push.call(this, obj, elem)
+            },
+            addUndefined: function addUndefined(elem) {
+                this.length = undefined;
+                push.call(this, obj, elem)
+            },
+            addRegular: function addRegular(elem) {
+                this.length = 0;
+                push.call(this, this.regularObjArray, elem)
+            }
+        }
+        obj.addNaN({1: 'one'});
+        eq(obj.length, 1);
+        obj.addNull({2: 'two'});
+        eq(obj.length, 1);
+        obj.addUndefined({3: 'three'});
+        eq(obj.length, 1);
+        obj.addRegular({4: 'four'});
+        obj.addRegular({5: 'five'});
+        eq(obj.regularObjArray.length, 2);
+    },
+    'If the apply method is called on push, it should set the first argument as the this value.': function() {
+        var vegetables = ['parsnip', 'potato'];
+        var moreVegs = ['celery', 'beetroot'];
+        vegetables.push.apply(vegetables, moreVegs);
+        eq(vegetables.length, 4);
+    },
+    "5a) It should be able to be used with call().": function() {
+      fail();
+      var array = [0];
+      array.push.call(array, 1);
+      eq(array.length, 2);
+      eq(array[0], 0);
+      eq(array[1], 1);
+    },
+    "5b) It should be able to be used with apply().": function() {
+      fail();
+      var array = [0];
+      var argumentArray = [1, 2];
+      array.push.apply(array, argumentArray);
+      eq(array.length, 3);
+      eq(array[0], 0);
+      eq(array[1], 1);
+      eq(array[2], 2);
+    },
+
+    "6a) If array is object, it should work when used with call.": function() {
+      fail();
+      var testObject = {};
+      push.call(testObject, 0);
+      eq(testObject[0], 0);
+      eq(testObject.length, 1);
+    },
+
+    "7a) It object has length, and length is a number, begin insertion at index length.": function() {
+      fail();
+      var testObjectWhereLengthNotZero = {
+        length: 10
+      };
+      push.call(testObjectWhereLengthNotZero, "a");
+      eq(testObjectWhereLengthNotZero[10], "a");
+      eq(testObjectWhereLengthNotZero.length, 11);
+    },
+    "7b) It object has length, and length is 0, use the index 0.": function() {
+      fail();
+      var testObjectWhereLengthIsZero = {
+        length: 0
+      };
+      push.call(testObjectWhereLengthIsZero, "a");
+      eq(testObjectWhereLengthIsZero[0], "a");
+      eq(testObjectWhereLengthIsZero.length, 1);
+    },
+    "7c) If object has length, but length is not a number, use the index 0.": function() {
+      fail();
+      var testObjectWhereLengthNotNumber = {
+        length: "string"
+      };
+      push.call(testObjectWhereLengthNotNumber, "a");
+      eq(testObjectWhereLengthNotNumber[0], "a");
+      eq(testObjectWhereLengthNotNumber.length, 1);
+    },
+    "7d) If object does not have length, create length property.": function() {
+      fail();
+      var testObjectWithoutLength = {
+        key: "value"
+      };
+      eq(testObjectWithoutLength.length, undefined);
+      push.call(testObjectWithoutLength, "a");
+      eq(testObjectWithoutLength.length, 1);
+    },
+
+    "8a) If array is a string it should return typeError.": function() {
+      fail();
+      var isTypeError = false;
+      try {
+        function pushArguments() {
+          push.call("string", 1);
+        }
+        pushArguments();
+      } catch (e) {
+        isTypeError = e instanceof TypeError;
+      }
+      eq(isTypeError, true);
+    }
+   
+});
+
+</script>
