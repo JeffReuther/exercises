@@ -1,1 +1,1 @@
-Placeholder
+In 2020/2021, I worked on re-creating the prototypical array methods with Gordon M. Zhu's Watch and Code curriculum and cohort. Most of the work was done by myself, with some inspiration from some of the students.
